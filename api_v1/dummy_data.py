@@ -1,5 +1,5 @@
 import math
-from random import random
+from random import random, randint, sample
 from shapely.geometry import Point
 import geopandas
 
@@ -23,6 +23,8 @@ def generate_random_point(latitude, longitude, max_radius):
 def create_sample():
     num_users = 1000
     num_restaurants = 100
+    min_eval = 3
+    max_eval = 6
     users = []
     restaurants = []
     cities = [[48.8620625, 2.3427284, 5000], [45.90751266479492, 6.124344348907471, 3000]]
@@ -35,12 +37,11 @@ def create_sample():
             radius = city_pick[2]
             lat, lon = generate_random_point(latitude, longitude, radius)
 
-            restaurant = Restaurant(name='restaurant_{}'.format(j), latitude=lat, longitude=lon)
+            restaurant = Restaurant(name='restaurant_{}'.format(j), coordinates='POINT({} {})'.format(lon, lat))
             session.add(restaurant)
             session.commit()
             session.refresh(restaurant)
             restaurants.append(restaurant)
-
 
         for i in range(num_users):
             user = User(user_alias='dummy_{}'.format(i))
@@ -49,10 +50,13 @@ def create_sample():
             session.refresh(user)
             users.append(user)
 
-
-        notation_1 = UserRestaurantNotation(user_id=user_1.id, restaurant_id = restaurant_a.id, notation=8)
-        session.add(notation_1)
-        session.commit()
+            num_eval = randint(min_eval, max_eval)
+            rest_ids = sample(range(num_restaurants), num_eval)
+            for el in rest_ids:
+                restaurant = restaurants[el]
+                notation = UserRestaurantNotation(user_id=user.id, restaurant_id = restaurant.id, notation=randint(1,10))
+                session.add(notation)
+                session.commit()
 
 
 def main():

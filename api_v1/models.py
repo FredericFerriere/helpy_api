@@ -1,29 +1,32 @@
 import datetime
 import uuid
-
-from sqlmodel import SQLModel, Field
-
+from geoalchemy2 import Geometry
+from sqlmodel import SQLModel, Field, Column
+from shapely import Point
 
 class User(SQLModel, table=True):
-    __tablename__ = "helpy_user"
+    __tablename__ = "users"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_alias: str
 
 
 class Restaurant(SQLModel, table=True):
+    __tablename__ = "restaurants"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str
-    latitude: float
-    longitude: float
+    coordinates: Geometry=Field(sa_column=Column(Geometry(geometry_type='POINT', srid=4326)))
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class UserRestaurantNotation(SQLModel, table=True):
-    __tablename__ = "user_restaurant_notation"
+    __tablename__ = "user_restaurant_notations"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="helpy_user.id")
-    restaurant_id: uuid.UUID = Field(foreign_key="restaurant.id")
+    user_id: uuid.UUID = Field(foreign_key="users.id")
+    restaurant_id: uuid.UUID = Field(foreign_key="restaurants.id")
     notation_date: datetime.datetime = Field(default=datetime.datetime.now(datetime.UTC))
     visit_date: datetime.datetime | None = Field(default=None)
     notation: int
