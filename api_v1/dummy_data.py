@@ -62,6 +62,7 @@ def create_sample():
 def main():
     create_db_and_tables()
     create_sample()
+    return
 
 if __name__ == "__main__":
     main()
