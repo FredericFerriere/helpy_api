@@ -1,9 +1,14 @@
 import datetime
 import uuid
-from geoalchemy2 import Geometry
-from sqlmodel import SQLModel, Field, Column
+import json
 
+import sqlalchemy as sa
+from geoalchemy2 import Geometry, WKBElement
+from sqlmodel import SQLModel, Field, Column, Session
 from geojson_pydantic import Point
+from pydantic import field_validator
+
+from .database import engine
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -18,9 +23,8 @@ class Restaurant(SQLModel, table=True):
     name: str
     coordinates: Point=Field(sa_column=Column(Geometry(geometry_type='POINT', srid=4326)))
 
-
-    class Config:
-        arbitrary_types_allowed = True
+    #class Config:
+    #    arbitrary_types_allowed = True
 
 
 class UserRestaurantNotation(SQLModel, table=True):

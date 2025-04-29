@@ -21,8 +21,8 @@ def generate_random_point(latitude, longitude, max_radius):
     return new_point.y, new_point.x
 
 def create_sample():
-    num_users = 1000
-    num_restaurants = 100
+    num_users = 100
+    num_restaurants = 10
     min_eval = 3
     max_eval = 6
     users = []
