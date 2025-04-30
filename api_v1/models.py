@@ -3,7 +3,7 @@ import uuid
 import json
 
 import sqlalchemy as sa
-from geoalchemy2 import Geometry, WKBElement
+from geoalchemy2 import Geometry, WKBElement, Geography
 from sqlmodel import SQLModel, Field, Column, Session
 from geojson_pydantic import Point
 from pydantic import field_validator
@@ -21,7 +21,7 @@ class Restaurant(SQLModel, table=True):
     __tablename__ = "restaurants"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str
-    coordinates: Point=Field(sa_column=Column(Geometry(geometry_type='POINT', srid=4326)))
+    coordinates: Point=Field(sa_column=Column(Geography(geometry_type='POINT', srid=4326)))
 
     #class Config:
     #    arbitrary_types_allowed = True
