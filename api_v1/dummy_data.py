@@ -5,7 +5,7 @@ import geopandas
 
 from sqlmodel import Session
 
-from .models import User, Restaurant, UserRestaurantNotation
+from .models import User, Restaurant, UserRestaurantRating
 from .database import engine, create_db_and_tables
 
 def generate_random_point(latitude, longitude, max_radius):
@@ -54,8 +54,8 @@ def create_sample():
             rest_ids = sample(range(num_restaurants), num_eval)
             for el in rest_ids:
                 restaurant = restaurants[el]
-                notation = UserRestaurantNotation(user_id=user.id, restaurant_id = restaurant.id, notation=randint(1,10))
-                session.add(notation)
+                rating = UserRestaurantRating(user_id=user.id, restaurant_id = restaurant.id, rating=randint(1,10))
+                session.add(rating)
                 session.commit()
 
 

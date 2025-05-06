@@ -27,15 +27,15 @@ class Restaurant(SQLModel, table=True):
     #    arbitrary_types_allowed = True
 
 
-class UserRestaurantNotation(SQLModel, table=True):
-    __tablename__ = "user_restaurant_notations"
+class UserRestaurantRating(SQLModel, table=True):
+    __tablename__ = "user_restaurant_ratings"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id")
     restaurant_id: uuid.UUID = Field(foreign_key="restaurants.id")
-    notation_date: datetime.datetime = Field(default=datetime.datetime.now(datetime.UTC))
+    rating_date: datetime.datetime = Field(default=datetime.datetime.now(datetime.UTC))
     visit_date: datetime.datetime | None = Field(default=None)
-    notation: int
+    rating: int
 
 
 
