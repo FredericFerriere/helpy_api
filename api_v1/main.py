@@ -1,12 +1,16 @@
-from fastapi import FastAPI, Query
+import uuid
+from datetime import datetime
+
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlmodel import Session, select, func
 
 from .database import engine
-from .models import Restaurant, UserRestaurantRating
+from .models import User, Restaurant, UserRestaurantRating
 from geoalchemy2.shape import to_shape
 from geoalchemy2.functions import ST_Buffer, ST_GeogFromText, ST_Distance
+
 
 app = FastAPI()
 
@@ -62,4 +66,23 @@ async def get_restaurant_suggestions_user(user_id,
                 'average_rating': round(rating,1)}
                for restaurant_id, restaurant_name, location, rating in results]
         return res
+
+@app.post('/users/{user_id}/restaurants/new_rating/')
+async def put_restaurant_rating(user_id: uuid.UUID, restaurant_id: uuid.UUID, rating: int=Query(ge=1, le=10),
+                                rating_date: datetime = datetime.now(), visit_date: datetime | None = None):
+
+    with Session(engine) as session:
+        user = session.get(User, user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        restaurant = session.get(Restaurant, restaurant_id)
+        if not restaurant:
+            raise HTTPException(status_code=404, detail="Restaurant not found")
+
+        new_rating = UserRestaurantRating(user_id=user_id, restaurant_id=restaurant_id, rating=rating,
+                                      rating_date=rating_date, visit_date=visit_date)
+        session.add(new_rating)
+        session.commit()
+
 
