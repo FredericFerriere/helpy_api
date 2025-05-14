@@ -32,6 +32,11 @@ def get_root():
 
 @app.get('/users/{user_id}/restaurants/my_notations')
 async def get_known_restaurants_user(user_id: str):
+    '''
+
+    :param user_id: INFER FROM JWT
+    :return:
+    '''
     with Session(engine) as session:
         statement = select(Restaurant, UserRestaurantRating).join(UserRestaurantRating).where(
             UserRestaurantRating.user_id==user_id)
@@ -49,6 +54,14 @@ async def get_restaurant_suggestions_user(user_id,
                                           latitude: float = Query(ge=-90, le=90),
                                           longitude: float = Query(ge=-180, le=180),
                                           radius: int = Query(ge=1, le=10000)):
+    '''
+
+    :param user_id: INFER FROM JWT
+    :param latitude:
+    :param longitude:
+    :param radius:
+    :return:
+    '''
     with Session(engine) as session:
         statement = select(
             Restaurant.id,
@@ -70,6 +83,15 @@ async def get_restaurant_suggestions_user(user_id,
 @app.post('/users/{user_id}/restaurants/new_rating/')
 async def put_restaurant_rating(user_id: uuid.UUID, restaurant_id: uuid.UUID, rating: int=Query(ge=1, le=10),
                                 rating_date: datetime = datetime.now(), visit_date: datetime | None = None):
+    '''
+
+    :param user_id: INFER FROM JWT
+    :param restaurant_id:
+    :param rating:
+    :param rating_date:
+    :param visit_date:
+    :return:
+    '''
 
     with Session(engine) as session:
         user = session.get(User, user_id)
@@ -84,5 +106,6 @@ async def put_restaurant_rating(user_id: uuid.UUID, restaurant_id: uuid.UUID, ra
                                       rating_date=rating_date, visit_date=visit_date)
         session.add(new_rating)
         session.commit()
+        return new_rating
 
 
