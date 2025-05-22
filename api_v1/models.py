@@ -9,6 +9,7 @@ from geojson_pydantic import Point
 from pydantic import field_validator
 
 from .database import engine
+from .constants import WORLD_GEODETIC_CRS
 
 
 class User(SQLModel, table=True):
@@ -22,7 +23,7 @@ class Restaurant(SQLModel, table=True):
     __tablename__ = "restaurants"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str
-    coordinates: Point = Field(sa_column=Column(Geography(geometry_type='POINT', srid=4326)))
+    coordinates: Point = Field(sa_column=Column(Geography(geometry_type='POINT', srid=WORLD_GEODETIC_CRS)))
 
     #class Config:
     #    arbitrary_types_allowed = True

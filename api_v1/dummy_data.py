@@ -8,9 +8,7 @@ from sqlmodel import Session
 from .models import User, Restaurant, UserRestaurantRating
 from .database import engine, create_db_and_tables
 from .record_manager import RecordManager
-
-PROJECTED_MERCATOR_CRS = 3857  #https://spatialreference.org/ref/epsg/3857/
-WORLD_GEODETIC_CRS = 4326  #https://epsg.io/4326
+from .constants import PROJECTED_MERCATOR_CRS, WORLD_GEODETIC_CRS
 
 
 def generate_random_point(latitude: float, longitude: float, max_radius: float):
