@@ -3,11 +3,9 @@ from random import random, randint, sample
 
 from shapely.geometry import Point
 import geopandas
-from sqlmodel import Session
 
 from .models import User, Restaurant, UserRestaurantRating
-from .database import engine, create_db_and_tables
-from .record_manager import RecordManager
+from .database_manager import DatabaseManager
 from .constants import PROJECTED_MERCATOR_CRS, WORLD_GEODETIC_CRS
 
 
@@ -49,33 +47,32 @@ def create_sample():
     restaurants = []
     cities = [[48.8620625, 2.3427284, 5000], [45.90751266479492, 6.124344348907471, 3000]]
 
-    with Session(engine) as session:
-        for j in range(num_restaurants):
-            city_pick = cities[0 if random() < 0.8 else 1]
-            latitude = city_pick[0]
-            longitude = city_pick[1]
-            radius = city_pick[2]
-            lat, lon = generate_random_point(latitude, longitude, radius)
+    for j in range(num_restaurants):
+        city_pick = cities[0 if random() < 0.8 else 1]
+        latitude = city_pick[0]
+        longitude = city_pick[1]
+        radius = city_pick[2]
+        lat, lon = generate_random_point(latitude, longitude, radius)
 
-            restaurant = Restaurant(name='restaurant_{}'.format(j), coordinates='POINT({} {})'.format(lon, lat))
-            RecordManager.add_record(restaurant)
-            restaurants.append(restaurant)
+        restaurant = Restaurant(name='restaurant_{}'.format(j), coordinates='POINT({} {})'.format(lon, lat))
+        DatabaseManager.add_record(restaurant)
+        restaurants.append(restaurant)
 
-        for i in range(num_users):
-            user = User(user_alias='dummy_{}'.format(i))
-            RecordManager.add_record(user)
-            users.append(user)
+    for i in range(num_users):
+        user = User(user_alias='dummy_{}'.format(i))
+        DatabaseManager.add_record(user)
+        users.append(user)
 
-            num_eval = randint(min_eval, max_eval)
-            rest_ids = sample(range(num_restaurants), num_eval)
-            for el in rest_ids:
-                restaurant = restaurants[el]
-                rating = UserRestaurantRating(user_id=user.id, restaurant_id=restaurant.id, rating=randint(1, 10))
-                RecordManager.add_record(rating)
+        num_eval = randint(min_eval, max_eval)
+        rest_ids = sample(range(num_restaurants), num_eval)
+        for el in rest_ids:
+            restaurant = restaurants[el]
+            rating = UserRestaurantRating(user_id=user.id, restaurant_id=restaurant.id, rating=randint(1, 10))
+            DatabaseManager.add_record(rating)
 
 
 def main():
-    create_db_and_tables()
+    DatabaseManager.create_db_and_tables()
     create_sample()
     return
 

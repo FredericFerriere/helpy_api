@@ -1,14 +1,10 @@
 import datetime
 import uuid
-import json
 
-import sqlalchemy as sa
-from geoalchemy2 import Geometry, WKBElement, Geography
-from sqlmodel import SQLModel, Field, Column, Session
+from geoalchemy2 import Geography
+from sqlmodel import SQLModel, Field, Column
 from geojson_pydantic import Point
-from pydantic import field_validator
 
-from .database import engine
 from .constants import WORLD_GEODETIC_CRS
 
 
