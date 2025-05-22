@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+import logging
 
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,8 +10,11 @@ from sqlmodel import Session, select, func
 from .database import engine
 from .models import User, Restaurant, UserRestaurantRating
 from geoalchemy2.shape import to_shape
-from geoalchemy2.functions import ST_Buffer, ST_GeogFromText, ST_Distance
+from geoalchemy2.functions import ST_GeogFromText, ST_Distance
+from .record_manager import RecordManager
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
@@ -26,9 +30,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get('/')
 def get_root():
-    return {"a":"b"}
+    return {"a": "b"}
+
 
 @app.get('/users/{user_id}/restaurants/my_notations')
 async def get_known_restaurants_user(user_id: str):
@@ -48,6 +54,7 @@ async def get_known_restaurants_user(user_id: str):
                         'user_id': rating.user_id,
                         'location': to_shape(restaurant.coordinates).wkt})
         return res
+
 
 @app.get('/users/{user_id}/restaurants/geographic_filter/')
 async def get_restaurant_suggestions_user(user_id,
@@ -70,7 +77,7 @@ async def get_restaurant_suggestions_user(user_id,
             func.avg(UserRestaurantRating.rating).label('average_rating')
         ).join(UserRestaurantRating).where(
             ST_Distance(Restaurant.coordinates, ST_GeogFromText('SRID=4326;POINT({} {})'
-                                                                   .format(longitude, latitude)))<radius
+                                                                   .format(longitude, latitude))) < radius
                ).group_by(Restaurant.id)
         results = session.exec(statement)
         res = [{'id': restaurant_id,
@@ -81,17 +88,16 @@ async def get_restaurant_suggestions_user(user_id,
         return res
 
 @app.post('/users/{user_id}/restaurants/new_rating/')
-async def put_restaurant_rating(user_id: uuid.UUID, restaurant_id: uuid.UUID, rating: int=Query(ge=1, le=10),
+async def put_restaurant_rating(user_id: uuid.UUID, restaurant_id: uuid.UUID, rating: int = Query(ge=1, le=10),
                                 rating_date: datetime = datetime.now(), visit_date: datetime | None = None):
-    '''
-
+    """
     :param user_id: INFER FROM JWT
     :param restaurant_id:
     :param rating:
     :param rating_date:
     :param visit_date:
     :return:
-    '''
+    """
 
     with Session(engine) as session:
         user = session.get(User, user_id)
@@ -103,9 +109,6 @@ async def put_restaurant_rating(user_id: uuid.UUID, restaurant_id: uuid.UUID, ra
             raise HTTPException(status_code=404, detail="Restaurant not found")
 
         new_rating = UserRestaurantRating(user_id=user_id, restaurant_id=restaurant_id, rating=rating,
-                                      rating_date=rating_date, visit_date=visit_date)
-        session.add(new_rating)
-        session.commit()
+                                          rating_date=rating_date, visit_date=visit_date)
+        RecordManager.add_record(new_rating)
         return new_rating
-
-

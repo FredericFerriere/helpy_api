@@ -17,6 +17,6 @@ url_object = URL.create(
 
 engine = create_engine(url_object, plugins=["geoalchemy2"])
 
+
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
-
