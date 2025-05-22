@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 
 from fastapi import Query, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import select, func
 from geoalchemy2.shape import to_shape
 from geoalchemy2.functions import ST_GeogFromText, ST_Distance
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 app = create_app()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token_test")
 
 
 @app.get('/')
